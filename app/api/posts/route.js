@@ -17,6 +17,8 @@ export const GET = async (req) => {
 export const POST = async (req) => {
 	try {
 		const { title, description } = await req.json();
+		connectDb();
+		console.log(title, description);
 		if (!title || !description)
 			throw new Error("utguudiig zaawal oruulna uu!");
 

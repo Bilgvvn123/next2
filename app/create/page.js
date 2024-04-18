@@ -1,11 +1,13 @@
 "use client";
+
+import { storage } from "@/utils/firebase";
 import axios from "axios";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 const page = () => {
-	const currentUser = localStorage["loggedInUser"];
-
+	const [files, setFiles] = useState([]);
 	const [inputValues, setInputValues] = useState({
 		title: "",
 		description: "",
@@ -16,45 +18,94 @@ const page = () => {
 
 	const handleInput = (e) => {
 		// setInputValues()
-		console.log(e.target.id);
 		setInputValues({
 			...inputValues,
 			[e.target.id]: e.target.value,
 		});
-		console.log(inputValues);
 	};
 
 	const add = async (e) => {
 		e.preventDefault();
-		setInputValues({ title: "", description: "" });
 
 		try {
+			console.log(inputValues);
 			setLoading(true);
+			// server
 			const res = await axios.post("/api/posts", {
 				...inputValues,
-				createdUser: currentUser,
 			});
-			console.log(res);
+
 			if (!res.status === 200) {
 				setLoading(false);
 				setError(res.data.message);
 				toast.error(error);
 			} else {
-				toast.success(
-					currentUser +
-						" id-tai hereglegchiin post amjilttai nemgdlee"
-				);
 				setLoading(false);
+				toast.success("hereglegchiin post amjilttai nemgdlee");
 			}
 		} catch (e) {
 			setLoading(false);
-			toast.error(e.message);
+			toast.error("=======>", e.message);
+		}
+
+		setInputValues({ title: "", description: "" });
+	};
+
+	const handleUploadImage = () => {
+		if (files.length > 0 && files.length <= 5) {
+			const promises = [];
+			for (let i = 0; i < files.length; i++) {
+				promises[i] = storageImage(files[i]);
+			}
+
+			Promise.all(promises)
+				.then((r) => console.log(r))
+				.catch((e) => {
+					console.log(e);
+				});
 		}
 	};
 
+	const storageImage = async (file) => {
+		return new Promise((resolve, reject) => {
+			const filename = new Date().getTime() + file.name;
+			const storageRef = ref(storage, filename);
+			const uploadTask = uploadBytesResumable(storageRef, file);
+			uploadTask.on(
+				"state_changed",
+				(snapshot) => {
+					console.log(
+						`Upload is ${
+							(snapshot.bytesTransferred / snapshot.totalBytes) *
+							100
+						}% done`
+					);
+				},
+				(error) => {
+					reject(error);
+				}
+			);
+			resolve("Hello");
+		});
+	};
+
 	return (
-		<div>
+		<div className="flex justify-center items-center h-screen">
 			<form onSubmit={add}>
+				<div className="flex gap-4">
+					<label htmlFor="file">Choose file</label>
+					<input
+						id="file"
+						type="file"
+						multiple
+						hidden
+						onChange={(e) => {
+							setFiles(e.target.files);
+						}}
+					/>
+					<button onClick={handleUploadImage}>upload</button>
+				</div>
+				<br />
 				<input
 					type="text"
 					id="title"
