@@ -16,13 +16,13 @@ export const GET = async (req) => {
 
 export const POST = async (req) => {
 	try {
-		const { title, description } = await req.json();
+		const { title, description, imageUrls } = await req.json();
 		connectDb();
 		console.log(title, description);
 		if (!title || !description)
 			throw new Error("utguudiig zaawal oruulna uu!");
 
-		const newPost = await Post.create({ title, description });
+		const newPost = await Post.create({ title, description, imageUrls });
 		if (!newPost) throw new Error("nemegdsengvi");
 
 		return new Response(JSON.stringify({ ok: true, newPost }));

@@ -5,7 +5,7 @@ const PostSchema = Schema(
 		title: String,
 		description: String,
 		createdUser: String,
-		imageUrls: String,
+		imageUrls: [],
 	},
 	{ timestamps: true }
 );

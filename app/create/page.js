@@ -1,14 +1,17 @@
 "use client";
 
+import React, { useState } from "react";
+import Image from "next/image";
+
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/utils/firebase";
 import axios from "axios";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import React, { useState } from "react";
 import toast from "react-hot-toast";
 
 const page = () => {
 	const [files, setFiles] = useState([]);
 	const [inputValues, setInputValues] = useState({
+		imageUrls: [],
 		title: "",
 		description: "",
 	});
@@ -34,6 +37,7 @@ const page = () => {
 			const res = await axios.post("/api/posts", {
 				...inputValues,
 			});
+			console.log(res.data);
 
 			if (!res.status === 200) {
 				setLoading(false);
@@ -52,14 +56,22 @@ const page = () => {
 	};
 
 	const handleUploadImage = () => {
-		if (files.length > 0 && files.length <= 5) {
+		if (
+			files.length > 0 &&
+			files.length + inputValues.imageUrls.length <= 5
+		) {
 			const promises = [];
 			for (let i = 0; i < files.length; i++) {
 				promises[i] = storageImage(files[i]);
 			}
 
 			Promise.all(promises)
-				.then((r) => console.log(r))
+				.then((url) =>
+					setInputValues({
+						...inputValues,
+						imageUrls: [...inputValues.imageUrls, url],
+					})
+				)
 				.catch((e) => {
 					console.log(e);
 				});
@@ -83,9 +95,22 @@ const page = () => {
 				},
 				(error) => {
 					reject(error);
+				},
+				() => {
+					getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+						resolve(url);
+					});
 				}
 			);
-			resolve("Hello");
+		});
+	};
+
+	const handleRemoveImage = (index) => {
+		setInputValues((prev) => {
+			return {
+				...prev,
+				imageUrls: prev.imageUrls.filter((_, i) => i !== index),
+			};
 		});
 	};
 
@@ -98,12 +123,29 @@ const page = () => {
 						id="file"
 						type="file"
 						multiple
-						hidden
 						onChange={(e) => {
 							setFiles(e.target.files);
 						}}
 					/>
 					<button onClick={handleUploadImage}>upload</button>
+					<div>
+						{inputValues.imageUrls &&
+							inputValues.imageUrls.map((url, i) => (
+								<div>
+									<img
+										src={url}
+										alt={url}
+										width={120}
+										height={60}
+									/>
+									<button
+										onClick={() => handleRemoveImage(i)}
+									>
+										remove
+									</button>
+								</div>
+							))}
+					</div>
 				</div>
 				<br />
 				<input
