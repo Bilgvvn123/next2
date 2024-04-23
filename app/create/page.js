@@ -132,7 +132,7 @@ const page = () => {
 						{inputValues.imageUrls &&
 							inputValues.imageUrls.map((url, i) => (
 								<div>
-									<img
+									<Image
 										src={url}
 										alt={url}
 										width={120}

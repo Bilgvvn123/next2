@@ -1,6 +1,5 @@
 import { connectDb } from "@/utils/connectDb";
 import Post from "@/models/Post";
-import { NextResponse } from "next/server";
 
 export const GET = async (req) => {
 	connectDb();
@@ -8,7 +7,7 @@ export const GET = async (req) => {
 		const posts = await Post.find();
 		if (!posts) throw new Error("Data oldsongvi");
 
-		return new Response(JSON.stringify(posts));
+		return new Response(JSON.stringify(posts), { status: 200 });
 	} catch (e) {
 		throw new Error(e.message);
 	}
