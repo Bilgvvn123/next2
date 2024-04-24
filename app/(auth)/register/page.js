@@ -40,9 +40,7 @@ const page = () => {
 			const res = await axios.post("api/auth/register", form);
 			if (res.status !== 201)
 				throw new Error("Bvrtgel amjiltgvi bolloo!");
-
 			setSuccess(res.data);
-			console.log(res);
 		} catch (e) {
 			setError(e.message);
 		}
