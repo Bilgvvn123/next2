@@ -3,8 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+	const router = useRouter();
 	const [form, setForm] = React.useState({
 		name: "",
 		email: "",
@@ -41,6 +43,7 @@ const page = () => {
 			if (res.status !== 201)
 				throw new Error("Bvrtgel amjiltgvi bolloo!");
 			setSuccess(res.data);
+			router.push("/login");
 		} catch (e) {
 			setError(e.message);
 		}

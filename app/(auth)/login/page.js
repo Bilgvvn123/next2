@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const page = () => {
 	const [form, setForm] = React.useState({
@@ -10,6 +11,7 @@ const page = () => {
 		password: "",
 	});
 	const [error, setError] = React.useState(null);
+	const router = useRouter();
 
 	const resetForm = () =>
 		setForm({
@@ -26,14 +28,15 @@ const page = () => {
 		setError(null);
 	};
 
-	const login = async (e) => {
+	const handleLogin = async (e) => {
 		e.preventDefault();
 		try {
 			if (!form.email || !form.password)
 				throw new Error("Ta talbaraa bvren buglunu vv!");
-			signIn("credentials", form);
+			await signIn("credentials", form);
+			router.replace("/");
 		} catch (e) {
-			setError(e);
+			console.log(e);
 		}
 		resetForm();
 	};
@@ -42,7 +45,7 @@ const page = () => {
 		<div className="h-screen flex justify-center items-center">
 			<form
 				className="w-[500px] rounded-lg flex flex-col items-center py-4 shadow"
-				onSubmit={login}
+				onSubmit={handleLogin}
 			>
 				<Image
 					src={
